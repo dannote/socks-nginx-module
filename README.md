@@ -18,6 +18,8 @@ location / {
 }
 ```
 
+All [ngx_http_proxy_module](http://nginx.org/en/docs/http/ngx_http_proxy_module.html) directives are supported.
+
 ##socks_tunnel_header
 
 As nginx HTTP parser doesn't support HTTP CONNECT method, a special header can be set to indicate tunnel connection.
