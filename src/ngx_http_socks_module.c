@@ -1681,7 +1681,7 @@ ngx_http_socks_process_header(ngx_http_request_t *r)
                 || (!u->headers_in.chunked
                     && u->headers_in.content_length_n == 0))
             {
-                u->keepalive = 0; // !u->headers_in.connection_close;
+                u->keepalive = !u->headers_in.connection_close;
             }
 
             if (u->headers_in.status_n == NGX_HTTP_SWITCHING_PROTOCOLS) {
@@ -1739,7 +1739,7 @@ ngx_http_socks_input_filter_init(void *data)
 
         u->pipe->length = 0;
         u->length = 0;
-        u->keepalive = 0; // !u->headers_in.connection_close;
+        u->keepalive = !u->headers_in.connection_close;
 
     } else if (u->headers_in.chunked) {
         /* chunked */
@@ -1755,7 +1755,7 @@ ngx_http_socks_input_filter_init(void *data)
 
         u->pipe->length = 0;
         u->length = 0;
-        u->keepalive = 0; // !u->headers_in.connection_close;
+        u->keepalive = !u->headers_in.connection_close;
 
     } else {
         /* content length or connection close */
@@ -1994,7 +1994,7 @@ ngx_http_socks_non_buffered_copy_filter(void *data, ssize_t bytes)
     u->length -= bytes;
 
     if (u->length == 0) {
-        u->keepalive = 0; // !u->headers_in.connection_close;
+        u->keepalive = !u->headers_in.connection_close;
     }
 
     return NGX_OK;
@@ -2074,7 +2074,7 @@ ngx_http_socks_non_buffered_chunked_filter(void *data, ssize_t bytes)
 
             /* a whole response has been parsed successfully */
 
-            u->keepalive = 0; // !u->headers_in.connection_close;
+            u->keepalive = !u->headers_in.connection_close;
             u->length = 0;
 
             break;
