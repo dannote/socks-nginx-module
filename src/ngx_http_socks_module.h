@@ -47,7 +47,6 @@ struct ngx_http_socks_rewrite_s {
 
 
 typedef struct {
-    ngx_str_t                      key_start;
     ngx_str_t                      schema;
     ngx_str_t                      host_header;
     ngx_str_t                      port;

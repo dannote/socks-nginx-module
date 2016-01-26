@@ -2942,7 +2942,6 @@ ngx_http_socks_upstream_process_upgraded(ngx_http_request_t *r,
     ngx_connection_t          *c, *downstream, *upstream, *dst, *src;
     ngx_http_upstream_t       *u;
     ngx_http_core_loc_conf_t  *clcf;
-    ngx_http_socks_ctx_t      *ctx;
 
     c = r->connection;
     u = r->upstream;

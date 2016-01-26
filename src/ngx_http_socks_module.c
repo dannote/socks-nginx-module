@@ -623,6 +623,14 @@ ngx_http_socks_handler(ngx_http_request_t *r)
     ngx_http_socks_main_conf_t  *pmcf;
 #endif
 
+    if (r->http_version < NGX_HTTP_VERSION_11) {
+      return NGX_HTTP_BAD_REQUEST;
+    }
+
+    if (ngx_http_socks_upstream_create(r) != NGX_OK) {
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
+
     if (ngx_http_socks_upstream_create(r) != NGX_OK) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
@@ -771,8 +779,6 @@ ngx_http_socks_eval(ngx_http_request_t *r, ngx_http_socks_ctx_t *ctx,
         }
     }
 
-    ctx->vars.key_start = u->schema;
-
     ngx_http_socks_set_vars(&url, &ctx->vars);
 
     u->resolved = ngx_pcalloc(r->pool, sizeof(ngx_http_upstream_resolved_t));
@@ -804,6 +810,7 @@ ngx_http_socks_create_key(ngx_http_request_t *r)
     size_t                      len, loc_len;
     u_char                     *p;
     uintptr_t                   escape;
+    ngx_str_t                  host;
     ngx_str_t                  *key;
     ngx_http_upstream_t        *u;
     ngx_http_socks_ctx_t       *ctx;
@@ -814,6 +821,8 @@ ngx_http_socks_create_key(ngx_http_request_t *r)
     slcf = ngx_http_get_module_loc_conf(r, ngx_http_socks_module);
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_socks_module);
+
+    host = r->headers_in.host->value;
 
     key = ngx_array_push(&r->cache->keys);
     if (key == NULL) {
@@ -829,8 +838,16 @@ ngx_http_socks_create_key(ngx_http_request_t *r)
         return NGX_OK;
     }
 
-    *key = ctx->vars.key_start;
+    p = ngx_pnalloc(r->pool, host.len + 7);
+    if (p == NULL) {
+        return NGX_ERROR;
+    }
 
+    key->data = p;
+    p = ngx_copy(p, "http://", 7);
+    p = ngx_copy(p, host.data, host.len);
+    key->len = p - key->data;
+  
     key = ngx_array_push(&r->cache->keys);
     if (key == NULL) {
         return NGX_ERROR;
@@ -3417,7 +3434,6 @@ ngx_http_socks_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     slcf->vars.schema.len = 9;
     slcf->vars.schema.data = url->data;
-    slcf->vars.key_start = slcf->vars.schema;
 
     ngx_http_socks_set_vars(&u, &slcf->vars);
 
@@ -3998,12 +4014,9 @@ ngx_http_socks_set_vars(ngx_url_t *u, ngx_http_socks_vars_t *v)
             v->port = u->port_text;
         }
 
-        v->key_start.len += v->host_header.len;
-
     } else {
         ngx_str_set(&v->host_header, "localhost");
         ngx_str_null(&v->port);
-        v->key_start.len += sizeof("unix:") - 1 + u->host.len + 1;
     }
 
     v->uri = u->uri;
