@@ -12,6 +12,8 @@ location / {
   socks_tunnel_header X-Connect;
   socks_buffers 16 16k; 
   socks_buffer_size 32k;
+  socks_cache proxy;
+  socks_cache_valid 30s;
   socks_cache_use_stale error timeout invalid_header updating
                         http_500 http_502 http_503 http_504;
   socks_pass socks5://127.0.0.1:1080;
