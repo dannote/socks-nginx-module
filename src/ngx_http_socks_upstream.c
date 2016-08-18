@@ -1306,7 +1306,7 @@ ngx_http_socks_upstream_init_connection(ngx_http_request_t *r, ngx_http_upstream
     }
 
     u->request_sent = 0;
-    u->request_all_sent = 0;
+    u->request_body_sent = 0;
 
     ngx_http_socks_upstream_handshake(c);
 
@@ -1472,7 +1472,7 @@ ngx_http_socks_upstream_send_request(ngx_http_request_t *r, ngx_http_upstream_t 
         ngx_del_timer(c->write);
     }
 
-    u->request_all_sent = 1;
+    u->request_body_sent = 1;
 
     if (c->tcp_nopush == NGX_TCP_NOPUSH_SET) {
         if (ngx_tcp_push(c->fd) == NGX_ERROR) {
@@ -1636,7 +1636,7 @@ ngx_http_socks_upstream_send_request_handler(ngx_http_request_t *r,
         return;
     }
 
-    if (u->request_all_sent) {
+    if (u->request_body_sent) {
         u->write_event_handler = ngx_http_socks_upstream_dummy_handler;
 
         (void) ngx_handle_write_event(c->write, 0);
