@@ -1,6 +1,6 @@
 # socks-nginx-module
 
-An nginx_http_proxy_module fork with SOCKS5 support
+An `nginx_http_proxy_module` fork with SOCKS5 support
 
 ## Building
 
@@ -49,9 +49,9 @@ All [ngx_http_proxy_module](http://nginx.org/en/docs/http/ngx_http_proxy_module.
 
 ### socks_tunnel_header
 
-As nginx HTTP parser doesn't support HTTP CONNECT method, a special header can be set to indicate tunnel connection.
+As `nginx` HTTP parser doesn't support HTTP CONNECT method, a special header can be set to indicate tunnel connection.
 
-This directive can be exploited with the following HAProxy configuration:
+This directive can be exploited with the following `HAProxy` configuration:
 
 ```
 frontend local
