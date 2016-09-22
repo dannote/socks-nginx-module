@@ -642,9 +642,11 @@ ngx_http_socks_upstream_cache(ngx_http_request_t *r, ngx_http_upstream_t *u)
             return rc;
         }
 
+#if nginx_version >= 1009007
         if ((r->method & NGX_HTTP_HEAD) && u->conf->cache_convert_head) {
             u->method = ngx_http_core_get_method;
         }
+#endif
 
         if (ngx_http_file_cache_new(r) != NGX_OK) {
             return NGX_ERROR;
@@ -1306,7 +1308,10 @@ ngx_http_socks_upstream_init_connection(ngx_http_request_t *r, ngx_http_upstream
     }
 
     u->request_sent = 0;
+
+#if nginx_version >= 1009010
     u->request_body_sent = 0;
+#endif
 
     ngx_http_socks_upstream_handshake(c);
 
@@ -1472,7 +1477,9 @@ ngx_http_socks_upstream_send_request(ngx_http_request_t *r, ngx_http_upstream_t 
         ngx_del_timer(c->write);
     }
 
+#if nginx_version >= 1009010
     u->request_body_sent = 1;
+#endif
 
     if (c->tcp_nopush == NGX_TCP_NOPUSH_SET) {
         if (ngx_tcp_push(c->fd) == NGX_ERROR) {
@@ -1636,7 +1643,11 @@ ngx_http_socks_upstream_send_request_handler(ngx_http_request_t *r,
         return;
     }
 
+#if nginx_version >= 1009010
     if (u->request_body_sent) {
+#else
+    if (u->request_sent) {   
+#endif
         u->write_event_handler = ngx_http_socks_upstream_dummy_handler;
 
         (void) ngx_handle_write_event(c->write, 0);
