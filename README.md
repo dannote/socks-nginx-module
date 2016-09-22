@@ -1,6 +1,31 @@
 # socks-nginx-module
 
-Sample usage:
+An nginx_http_proxy_module fork with SOCKS5 support
+
+## Building
+
+`nginx` >= **1.9.1** is supported.
+
+```bash
+sudo apt-get install git build-essential zlib1g-dev libpcre3 libpcre3-dev unzip
+
+git clone https://github.com/dannote/socks-nginx-module
+wget http://nginx.org/download/nginx-1.9.15.tar.gz
+
+tar -xzvf nginx-1.9.15.tar.gz
+
+cd nginx-1.9.15
+
+# See http://nginx.org/en/docs/configure.html for more configuration options
+./configure --add-module=../socks-nginx-module
+
+make
+sudo make install
+```
+
+## Configuring
+
+Sample configuration:
 
 ```
 location / {
@@ -22,7 +47,7 @@ location / {
 
 All [ngx_http_proxy_module](http://nginx.org/en/docs/http/ngx_http_proxy_module.html) directives are supported.
 
-##socks_tunnel_header
+### socks_tunnel_header
 
 As nginx HTTP parser doesn't support HTTP CONNECT method, a special header can be set to indicate tunnel connection.
 
