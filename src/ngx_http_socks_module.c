@@ -1035,7 +1035,7 @@ ngx_http_socks_create_request(ngx_http_request_t *r)
         le.ip += sizeof(uintptr_t);
     }
 
-    if (slcf->tunnel_header.data) {
+    if (slcf->tunnel_header.len) {
         part = &r->headers_in.headers.part;
         header = part->elts;
 
