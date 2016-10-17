@@ -87,6 +87,8 @@ typedef struct {
     ngx_str_t                      location;
     ngx_str_t                      url;
 
+    ngx_http_complex_value_t       host;
+
 #if (NGX_HTTP_CACHE)
     ngx_http_complex_value_t       cache_key;
 #endif
@@ -112,6 +114,8 @@ typedef struct {
 
     ngx_chain_t                   *free;
     ngx_chain_t                   *busy;
+
+    ngx_str_t                      host;
 
     unsigned                       head:1;
     unsigned                       internal_chunked:1;

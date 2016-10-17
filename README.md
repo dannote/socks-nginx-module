@@ -4,28 +4,28 @@ An `nginx_http_proxy_module` fork with SOCKS5 support
 
 ## Building
 
-`nginx` >= **1.9.1** is supported.
+nginx >= **1.9.1** is supported.
 
 ```bash
-sudo apt-get install git build-essential zlib1g-dev libpcre3 libpcre3-dev unzip
+# apt-get install git build-essential zlib1g-dev libpcre3 libpcre3-dev unzip
 
-git clone https://github.com/dannote/socks-nginx-module
-wget http://nginx.org/download/nginx-1.9.15.tar.gz
+$ git clone https://github.com/dannote/socks-nginx-module
+$ wget http://nginx.org/download/nginx-1.9.15.tar.gz
 
-tar -xzvf nginx-1.9.15.tar.gz
+$ tar -xzvf nginx-1.9.15.tar.gz
 
-cd nginx-1.9.15
+$ cd nginx-1.9.15
 
 # See http://nginx.org/en/docs/configure.html for more configuration options
-./configure --add-module=../socks-nginx-module
+$ ./configure --add-module=../socks-nginx-module
 
-make
-sudo make install
+$ make
+# make install
 ```
 
 ## Configuring
 
-Sample configuration:
+Sample HTTP to SOCKS5 proxy configuration:
 
 ```
 location / {
@@ -49,9 +49,11 @@ All [ngx_http_proxy_module](http://nginx.org/en/docs/http/ngx_http_proxy_module.
 
 ### socks_tunnel_header
 
-As `nginx` HTTP parser doesn't support HTTP CONNECT method, a special header can be set to indicate tunnel connection.
+Context: `http`, `server`, `location`
 
-This directive can be exploited with the following `HAProxy` configuration:
+As nginx HTTP parser doesn't support HTTP CONNECT method, a special header can be set to indicate tunnel connection.
+
+This directive can be exploited with the following HAProxy configuration:
 
 ```
 frontend local
@@ -65,4 +67,24 @@ frontend local
 backend nginx
   mode http
   server proxy 127.0.0.1:8080 maxconn 100000
+```
+
+### socks_set_host
+
+Context: `http`, `server`, `location`
+
+Default: `proxy_set_host $http_host;`
+
+Overrides the endpoint server.
+
+This example will proxy requests to `ipinfo.io` via local Tor daemon:
+
+```
+location /ip {
+  socks_pass socks5://127.0.0.1:9050;
+  socks_set_host ipinfo.io;
+  socks_set_header Host ipinfo.io; 
+  socks_redirect off;
+  socks_http_version 1.1;
+}
 ```

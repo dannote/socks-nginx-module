@@ -2039,7 +2039,6 @@ ngx_http_socks_upstream_write_handler(ngx_http_request_t *r,
     ngx_connection_t      *c;
     u_char                *buf, host_len, i;
     ngx_uint_t             len;
-    ngx_str_t             *host;
     ngx_uint_t             port;
     ngx_http_socks_ctx_t      *ctx;
 
@@ -2062,19 +2061,20 @@ ngx_http_socks_upstream_write_handler(ngx_http_request_t *r,
         break;
 
     case socks_connect:
-        if (!r->headers_in.host || r->headers_in.host->value.len > 0xFF) {
+        if (!ctx->host.len || ctx->host.len > 0xFF) {
+            ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
+                          "invalid target host");
             ngx_http_finalize_request(r, NGX_HTTP_BAD_REQUEST);
             return;
         }
 
-        host = &r->headers_in.host->value;
-        host_len = (u_char) host->len;
+        host_len = (u_char) ctx->host.len;
         port = ctx->tunnel ? 443 : 80;
 
         for (i = 0; i < host_len; i++) {
-            if (host->data[host_len - i - 1] == ':') {
-                host_len = host->len - i - 1;
-                port = ngx_atoi(host->data + host_len + 1, i);
+            if (ctx->host.data[host_len - i - 1] == ':') {
+                host_len = ctx->host.len - i - 1;
+                port = ngx_atoi(ctx->host.data + host_len + 1, i);
                 break;
             }
         }
@@ -2089,7 +2089,7 @@ ngx_http_socks_upstream_write_handler(ngx_http_request_t *r,
         buf[3] = NGX_HTTP_SOCKS_ADDR_DOMAIN_NAME;
         buf[4] = host_len;
         *(u_short*) (buf + len - 2) = ntohs(port);
-        ngx_memcpy(buf + 5, host->data, host_len);
+        ngx_memcpy(buf + 5, ctx->host.data, host_len);
 
         c->send(c, buf, len);
 

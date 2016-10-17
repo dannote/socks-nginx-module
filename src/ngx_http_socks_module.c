@@ -91,7 +91,9 @@ static ngx_int_t ngx_http_socks_rewrite_regex(ngx_conf_t *cf,
 
 static void ngx_http_socks_set_vars(ngx_url_t *u, ngx_http_socks_vars_t *v);
 static char *ngx_http_socks_tunnel_header(ngx_conf_t *cf, ngx_command_t *cmd,
-  void *conf);
+    void *conf);
+static char *ngx_http_socks_set_host(ngx_conf_t *cf, ngx_command_t *cmd,
+    void *conf);
 
 
 static ngx_conf_post_t  ngx_http_socks_lowat_post =
@@ -491,6 +493,13 @@ static ngx_command_t  ngx_http_socks_commands[] = {
       ngx_http_socks_tunnel_header,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_socks_loc_conf_t, tunnel_header),
+      NULL },
+
+    { ngx_string("socks_set_host"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      ngx_http_socks_set_host,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_socks_loc_conf_t, host),
       NULL },
 
       ngx_null_command
@@ -1058,6 +1067,15 @@ ngx_http_socks_create_request(ngx_http_request_t *r)
                 continue;
             }
         }
+    }
+
+    if (slcf->host.value.data) {
+        if (ngx_http_complex_value(r, &slcf->host, &ctx->host) != NGX_OK) {
+            return NGX_ERROR;
+        }
+    } else {
+        ctx->host.len = r->headers_in.host->value.len;
+        ctx->host.data = r->headers_in.host->value.data;
     }
 
     if (slcf->upstream.pass_request_headers) {
@@ -2977,6 +2995,10 @@ ngx_http_socks_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_str_value(conf->tunnel_header,
                               prev->tunnel_header, "");
 
+    if (conf->host.value.data == NULL) {
+        conf->host = prev->host;
+    }
+
     ngx_conf_merge_value(conf->redirect, prev->redirect, 1);
 
     if (conf->redirect) {
@@ -4040,4 +4062,31 @@ ngx_http_socks_tunnel_header(ngx_conf_t *cf, ngx_command_t *cmd, void *conf) {
   slcf->tunnel_header = value[1];
 
   return NGX_CONF_OK;
+}
+
+static char *
+ngx_http_socks_set_host(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+{
+    ngx_http_socks_loc_conf_t *slcf = conf;
+
+    ngx_str_t                         *value;
+    ngx_http_compile_complex_value_t   ccv;
+
+    value = cf->args->elts;
+
+    if (slcf->host.value.data) {
+        return "is duplicate";
+    }
+
+    ngx_memzero(&ccv, sizeof(ngx_http_compile_complex_value_t));
+
+    ccv.cf = cf;
+    ccv.value = &value[1];
+    ccv.complex_value = &slcf->host;
+
+    if (ngx_http_compile_complex_value(&ccv) != NGX_OK) {
+        return NGX_CONF_ERROR;
+    }
+
+    return NGX_CONF_OK;
 }
