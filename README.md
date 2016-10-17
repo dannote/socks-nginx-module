@@ -73,7 +73,7 @@ backend nginx
 
 Context: `http`, `server`, `location`
 
-Default: `proxy_set_host $http_host;`
+Default: `socks_set_host $http_host;`
 
 Overrides the endpoint server.
 
