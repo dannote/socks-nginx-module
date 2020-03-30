@@ -2752,9 +2752,16 @@ ngx_http_socks_upstream_send_response(ngx_http_request_t *r, ngx_http_upstream_t
         p->temp_file->persistent = 1;
 
 #if (NGX_HTTP_CACHE)
+    #if (nginx_version < 1011006)
         if (r->cache && r->cache->file_cache->temp_path) {
             p->temp_file->path = r->cache->file_cache->temp_path;
         }
+    #else
+        if (r->cache && !r->cache->file_cache->use_temp_path) {
+            p->temp_file->path = r->cache->file_cache->path;
+            p->temp_file->file.name = r->cache->file.name;
+        }
+    #endif
 #endif
 
     } else {
@@ -4790,13 +4797,13 @@ ngx_http_socks_upstream_add(ngx_conf_t *cf, ngx_url_t *u, ngx_uint_t flags)
         {
             continue;
         }
-
+#if (nginx_version < 1011006)
         if (uscfp[i]->default_port && u->default_port
             && uscfp[i]->default_port != u->default_port)
         {
             continue;
         }
-
+#endif
         if (flags & NGX_HTTP_UPSTREAM_CREATE) {
             uscfp[i]->flags = flags;
         }
@@ -4814,7 +4821,9 @@ ngx_http_socks_upstream_add(ngx_conf_t *cf, ngx_url_t *u, ngx_uint_t flags)
     uscf->file_name = cf->conf_file->file.name.data;
     uscf->line = cf->conf_file->line;
     uscf->port = u->port;
+#if (nginx_version < 1011006)
     uscf->default_port = u->default_port;
+#endif
     uscf->no_port = u->no_port;
 
     if (u->naddrs == 1 && (u->port || u->family == AF_UNIX)) {
