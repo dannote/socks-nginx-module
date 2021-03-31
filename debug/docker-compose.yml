@@ -1,0 +1,34 @@
+version: '2.4'
+services:
+  nginx:
+    build:
+      context: .
+      args:
+        NGX_VERSION: 1.19.6
+    ports:
+      - 8080:80
+    volumes:
+      - ..:/code
+      - build:/build
+    depends_on:
+      - proxy
+    links:
+      - proxy
+    networks: 
+      - local
+
+  proxy:
+    image: riftbit/3proxy
+    ports:
+      - 1080
+    networks: 
+      - local
+    volumes:
+      - .:/etc/3proxy/cfg
+
+volumes:
+  build:
+
+networks:
+  local:
+    driver: bridge

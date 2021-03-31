@@ -1,7 +1,11 @@
 ngx_addon_name=ngx_http_socks_module
 
-HTTP_MODULES="$HTTP_MODULES ngx_http_socks_module"
-NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/src/ngx_http_socks_module.c $ngx_addon_dir/src/ngx_http_socks_upstream.c"
-NGX_ADDON_DEPS="$NGX_ADDON_DEPS $ngx_addon_dir/src/ngx_http_socks_module.h"
-
-have=NGX_HTTP_SOCKS_MODULE . auto/have
+if test -n "$ngx_module_link"; then
+  ngx_module_type=HTTP
+  ngx_module_name=ngx_http_socks_module
+  ngx_module_srcs="$ngx_addon_dir/ngx_http_socks_module.c"
+  . auto/module
+else
+  HTTP_MODULES="$HTTP_MODULES ngx_http_socks_module"
+  NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/ngx_http_socks_module.c"
+fi
