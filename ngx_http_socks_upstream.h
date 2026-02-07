@@ -3719,6 +3719,8 @@ ngx_http_upstream_finalize_request(ngx_http_request_t *r,
 }
 
 
+#if (NGX_HTTP_SSL)
+
 static void
 ngx_http_upstream_ssl_init_connection(ngx_http_request_t *r,
     ngx_http_upstream_t *u, ngx_connection_t *c)
@@ -4023,6 +4025,8 @@ ngx_http_upstream_ssl_certificate(ngx_http_request_t *r,
 
     return NGX_OK;
 }
+
+#endif
 
 
 static ngx_int_t

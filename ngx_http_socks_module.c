@@ -1523,17 +1523,16 @@ ngx_http_socks_read_connect_response(ngx_http_request_t *r,
 static void
 ngx_http_socks_handshake_done(ngx_http_request_t *r, ngx_http_upstream_t *u)
 {
-    ngx_connection_t *c;
-
-    c = u->peer.connection;
-
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, c->log, 0, "http socks handshake done");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, u->peer.connection->log, 0,
+                   "http socks handshake done");
 
 #if (NGX_HTTP_SSL)
 
-    if (u->ssl && c->ssl == NULL) {
+    if (u->ssl && u->peer.connection->ssl == NULL) {
+        ngx_connection_t *c;
         ngx_http_proxy_ctx_t *pctx;
 
+        c = u->peer.connection;
         pctx = ngx_http_get_module_ctx(r, ngx_http_proxy_module);
 
         /*
