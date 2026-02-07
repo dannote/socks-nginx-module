@@ -1,0 +1,65 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 80
+
+# Braces
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterStruct: false
+  AfterEnum: false
+  AfterUnion: false
+  AfterControlStatement: Never
+  BeforeElse: true
+  SplitEmptyFunction: false
+
+# Function definitions: return type on its own line
+AlwaysBreakAfterReturnType: TopLevelDefinitions
+
+# Pointers attach to name (nginx style: ngx_int_t *p)
+PointerAlignment: Right
+
+# Space after C-style casts: (u_char *) foo
+SpaceAfterCStyleCast: true
+
+# No space before parens in control flow: if (x)
+SpaceBeforeParens: ControlStatements
+
+# Continuation indent = 4 (same as base)
+ContinuationIndentWidth: 4
+
+# Switch: case labels at same level as switch
+IndentCaseLabels: false
+
+# Don't sort includes (order matters in nginx)
+SortIncludes: Never
+
+AlignConsecutiveDeclarations: false
+AlignConsecutiveAssignments: false
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+
+# Don't break before binary operators
+BreakBeforeBinaryOperators: None
+
+# Single-line control flow: never
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+AllowShortCaseLabelsOnASingleLine: false
+
+# Empty lines
+MaxEmptyLinesToKeep: 2
+KeepEmptyLinesAtTheStartOfBlocks: false
+
+# Penalty tuning - prefer breaking after return type
+PenaltyReturnTypeOnItsOwnLine: 0
+PenaltyBreakBeforeFirstCallParameter: 200

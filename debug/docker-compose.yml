@@ -1,0 +1,63 @@
+services:
+  nginx:
+    build:
+      context: .
+      args:
+        NGX_VERSION: 1.26.3
+    ports:
+      - 8080:80
+    volumes:
+      - ..:/code
+      - build:/build
+      - build-asan:/build-asan
+    depends_on:
+      - proxy
+      - httpbin
+    networks:
+      - local
+
+  proxy:
+    image: riftbit/3proxy
+    ports:
+      - 1080
+    networks:
+      - local
+    volumes:
+      - .:/etc/3proxy/cfg
+
+  proxy-auth:
+    image: riftbit/3proxy
+    ports:
+      - 1080
+    networks:
+      - local
+    volumes:
+      - ./3proxy-auth.cfg:/etc/3proxy/cfg/3proxy.cfg
+
+  httpbin:
+    image: kennethreitz/httpbin
+    ports:
+      - 80
+    networks:
+      - local
+
+  httpbin-ssl:
+    image: nginx:alpine
+    ports:
+      - 443
+    networks:
+      - local
+    volumes:
+      - ./httpbin-ssl.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./test-ssl.crt:/etc/nginx/ssl/test-ssl.crt:ro
+      - ./test-ssl.key:/etc/nginx/ssl/test-ssl.key:ro
+    depends_on:
+      - httpbin
+
+volumes:
+  build:
+  build-asan:
+
+networks:
+  local:
+    driver: bridge
