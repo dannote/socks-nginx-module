@@ -2488,7 +2488,11 @@ ngx_http_upstream_send_response(ngx_http_request_t *r, ngx_http_upstream_t *u)
     p->downstream = c;
     p->pool = r->pool;
     p->log = c->log;
+#if (nginx_version >= 1028000)
+    p->limit_rate = ngx_http_complex_value_size(r, u->conf->limit_rate, 0);
+#else
     p->limit_rate = u->conf->limit_rate;
+#endif
     p->start_sec = ngx_time();
 
     p->cacheable = u->cacheable || u->store;
@@ -4017,6 +4021,9 @@ ngx_http_upstream_ssl_certificate(ngx_http_request_t *r,
                    "http upstream ssl key: \"%s\"", key.data);
 
     if (ngx_ssl_connection_certificate(c, r->pool, &cert, &key,
+#if (nginx_version >= 1028000)
+                                       u->conf->ssl_certificate_cache,
+#endif
                                        u->conf->ssl_passwords)
         != NGX_OK)
     {

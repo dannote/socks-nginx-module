@@ -1436,7 +1436,11 @@ ngx_http_proxy_chunked_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
 
     for ( ;; ) {
 
+#if (nginx_version >= 1028000)
+        rc = ngx_http_parse_chunked(r, buf, &ctx->chunked, 0);
+#else
         rc = ngx_http_parse_chunked(r, buf, &ctx->chunked);
+#endif
 
         if (rc == NGX_OK) {
 
@@ -1641,7 +1645,11 @@ ngx_http_proxy_non_buffered_chunked_filter(void *data, ssize_t bytes)
 
     for ( ;; ) {
 
+#if (nginx_version >= 1028000)
+        rc = ngx_http_parse_chunked(r, buf, &ctx->chunked, 0);
+#else
         rc = ngx_http_parse_chunked(r, buf, &ctx->chunked);
+#endif
 
         if (rc == NGX_OK) {
 
